@@ -7,7 +7,7 @@ class SteamUtil(object):
         self.backup_dir = self.__parse_location__('sutil_backup')
         self.is_dir()
         self.cfg = self.__get_cfg__()
-        self.steam_path = self.cfg['steam_path'].replace("'", '').replace('"', '')
+        self.steam_path = os.path.join(self.cfg['steam_path'], '')
         self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
     
 
@@ -58,7 +58,7 @@ class SteamUtil(object):
     def update_profile_list(self, args):
         """ Updates profile list to include all profiles that have been used on the PC """
         try:
-            for self.i, self.user in enumerate(os.listdir(self.steam_path + "\\userdata")):
+            for self.i, self.user in enumerate(os.listdir(self.steam_path + "userdata")):
                 self.url = SteamID(self.user).community_url
                 req = requests.get(self.url+'/ajaxaliases')
                 if req.status_code:
