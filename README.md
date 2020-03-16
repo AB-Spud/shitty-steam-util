@@ -5,8 +5,8 @@
 
 Example set up: 
 
->>> set steam_path "C:\Program Files (x86)\Steam"
->>> init
+cmd: set steam_path "C:\Program Files (x86)\Steam"
+cmd: init
 0  Added: 'profile1'
 1  Added: 'profile2'
 
@@ -15,12 +15,12 @@ Added 10 users to the profile list
 1  Backing up: C:\Program Files (x86)\Steam\userdata\1016722479
 
 Backed up 10 profiles.
->>> profs
+cmd: profs
 1010605382      0 : profile1
 1016722479      1 : profile2
 
->>> set master profile1
->>> copy * master
+cmd: set master profile1
+cmd: copy * master
 1 profiles inherited settings from profile1
 
 
