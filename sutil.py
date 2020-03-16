@@ -7,7 +7,7 @@ class SteamUtil(object):
         self.backup_dir = self.__parse_location__('sutil_backup')
         self.is_dir()
         self.cfg = self.__get_cfg__()
-        self.steam_path = self.cfg['steam_path']
+        self.steam_path = self.cfg['steam_path'].replace("'", '').replace('"', '')
         self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
     
 
@@ -196,3 +196,7 @@ if __name__ == '__main__':
         args = shlex.split(ar)
         if len(args) < 1: args = ['clear', '']
         a.call_cmd(args[0],args[1:])
+
+    
+
+        #TypeError
