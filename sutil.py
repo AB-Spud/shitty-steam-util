@@ -57,6 +57,7 @@ class SteamUtil(object):
     
     def update_profile_list(self, args):
         """ Updates profile list to include all profiles that have been used on the PC """
+        self.steam_path = os.path.join(self.cfg['steam_path'], '')
         try:
             for self.i, self.user in enumerate(os.listdir(os.path.join(self.steam_path, "userdata"))):
                 self.url = SteamID(self.user).community_url
