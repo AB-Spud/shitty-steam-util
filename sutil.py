@@ -1,5 +1,5 @@
 from steam import SteamID
-import requests, sys, os, json, shutil
+import requests, sys, os, json, shutil, shlex
 
 class SteamUtil(object):
     def __init__(self):
@@ -8,7 +8,7 @@ class SteamUtil(object):
         self.is_dir()
         self.cfg = self.__get_cfg__()
         self.steam_path = self.cfg['steam_path']
-        self.cmds = {'help': self.help, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
+        self.cmds = {'help': self.help, 'exit': self.exit,'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
     
 
     def __get_cfg__(self):
@@ -162,6 +162,10 @@ class SteamUtil(object):
             print(f"Backed up {self.i+1} profiles.")
         except Exception as error:
             pass
+    
+    def exit(self, args):
+        """ Exits the program """
+        sys.exit(0)
 
     def help(self, args):
         """ If 'help' is called returns list of commands, 'help <cmd>' returns details on the command """
@@ -181,11 +185,8 @@ class SteamUtil(object):
 
 
 if __name__ == '__main__':
-    cmd, args = sys.argv[1], sys.argv[2:]
     a = SteamUtil()
-    a.cmd(cmd, args)
-
-    # a = SteamID('146238979').community_url
-    # req = requests.get(a+'/ajaxaliases')
-    # b = json.loads(req.content)
-    # print(b[0]['newname'])
+    while True:
+        args = input(">>> ")
+        args = shlex.split(args)
+        a.cmd(args[0],args[1:])
