@@ -72,6 +72,7 @@ class SteamUtil(object):
 
         except FileNotFoundError as error:
             print(f"var 'steam_path' is not a valid path\nsteam_path = '{self.cfg['steam_path']}'")
+                  print(error)
 
     def load_cfg(self, arg):
         return json.load(open(arg, 'r'))
