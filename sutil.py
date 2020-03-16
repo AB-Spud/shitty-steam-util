@@ -58,7 +58,7 @@ class SteamUtil(object):
     def update_profile_list(self, args):
         """ Updates profile list to include all profiles that have been used on the PC """
         try:
-            for self.i, self.user in enumerate(os.listdir(self.steam_path + "userdata")):
+            for self.i, self.user in enumerate(os.listdir(os.path.join(self.steam_path, "userdata"))):
                 self.url = SteamID(self.user).community_url
                 req = requests.get(self.url+'/ajaxaliases')
                 if req.status_code:
@@ -72,7 +72,6 @@ class SteamUtil(object):
 
         except FileNotFoundError as error:
             print(f"var 'steam_path' is not a valid path\nsteam_path = '{self.cfg['steam_path']}'")
-                  print(error)
 
     def load_cfg(self, arg):
         return json.load(open(arg, 'r'))
