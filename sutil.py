@@ -38,6 +38,7 @@ class SteamUtil(object):
         return self.load_cfg(self.cfg_location)
     
     def stuffs(self, args):
+        """ Gets profiles and backs them up """
         self.update_profile_list([])
         self.backup_profiles([])
     
@@ -55,6 +56,7 @@ class SteamUtil(object):
         os.system('cls')
     
     def update_profile_list(self, args):
+        """ Updates profile list to include all profiles that have been used on the PC """
         try:
             for self.i, self.user in enumerate(os.listdir(self.steam_path + "\\userdata")):
                 self.url = SteamID(self.user).community_url
