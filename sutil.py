@@ -196,7 +196,3 @@ if __name__ == '__main__':
         args = shlex.split(ar)
         if len(args) < 1: args = ['clear', '']
         a.call_cmd(args[0],args[1:])
-
-    
-
-        #TypeError
