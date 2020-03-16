@@ -8,7 +8,7 @@ class SteamUtil(object):
         self.is_dir()
         self.cfg = self.__get_cfg__()
         self.steam_path = self.cfg['steam_path']
-        self.cmds = {'help': self.help, 'exit': self.exit,'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
+        self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
     
 
     def __get_cfg__(self):
@@ -41,12 +41,18 @@ class SteamUtil(object):
         self.update_profile_list([])
         self.backup_profiles([])
     
-    def cmd(self, cmd, *args):
+    def call_cmd(self, cmd, *args):
         try:
             self.cmds[cmd](args[0])
-        except KeyError as error:
-            raise error
-            print("Unkown command type 'help' for a list of commands.")
+        except Exception as error:
+            if type(error) == KeyError:
+                print(f"Unkown command {error} type 'help' for a list of commands.")
+            else:
+                pass
+    
+    def clear(self, args):
+        """ Clears console """
+        os.system('cls')
     
     def update_profile_list(self, args):
         try:
@@ -105,8 +111,7 @@ class SteamUtil(object):
             try:
                 self.p = args[1]
             except IndexError as error:
-                print('Inproper arguements: ')
-                self.cmd('help', ['copy'])
+                print('Bad args: copy <child> <parent>')
                 return None
 
         try:
@@ -150,6 +155,7 @@ class SteamUtil(object):
         return self.cfg['profiles'].keys()
     
     def backup_profiles(self, args):
+        """ Backs up userdata, stored in APPDATA/sutil_backup """
         try:
             for self.i, self.n in enumerate(self.get_profiles(args)):
                 self.path = os.path.join(self.cfg['steam_path'] + "\\userdata", self.cfg['profiles'][self.n])
@@ -181,12 +187,16 @@ class SteamUtil(object):
                 print(f"Command {error} doesn't exist.\n")
                 self.help([])
 
-        # print('hey', args[0])
 
 
 if __name__ == '__main__':
     a = SteamUtil()
     while True:
-        args = input(">>> ")
-        args = shlex.split(args)
-        a.cmd(args[0],args[1:])
+        ar = str(input(">>> "))
+        args = shlex.split(ar)
+        if len(args) < 1: args = ['clear', '']
+        a.call_cmd(args[0],args[1:])
+
+    
+
+        #TypeError
