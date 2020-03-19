@@ -2,6 +2,7 @@
 
 ## Command line tool used to easily copy CSGO settings between profiles.
 #### use the 'help' command for list of commands & 'help help' to see how to use the command
+#### <a href="https://www.mediafire.com/file/a16mnono6936cj5/sutil.exe/file">Compiled SUTIL</a>
 
 How to setup:
 
