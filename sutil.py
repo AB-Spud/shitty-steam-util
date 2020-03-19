@@ -1,5 +1,5 @@
 from steam import SteamID
-import requests, sys, os, json, shutil, shlex
+import requests, sys, os, json, shutil, shlex, pyperclip
 
 class SteamUtil(object):
     def __init__(self):
@@ -8,8 +8,7 @@ class SteamUtil(object):
         self.is_dir()
         self.cfg = self.__get_cfg__()
         self.steam_path = os.path.join(self.cfg['steam_path'], '')
-        self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
-    
+        self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'uprof': self.prof_url, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
 
     def __get_cfg__(self):
         if self.__check_file__(self.cfg_location):
@@ -50,7 +49,7 @@ class SteamUtil(object):
             if type(error) == KeyError:
                 print(f"Unkown command {error} type 'help' for a list of commands.")
             else:
-                pass
+                raise error
     
     def clear(self, args):
         """ Clears console """
@@ -157,6 +156,17 @@ class SteamUtil(object):
         """ Return a list of all profiles that have been used on the PC """        
         return self.cfg['profiles'].keys()
     
+    def get_prof_url(self, args):
+        """ Return a profile's url """
+        self.id_obj = SteamID(self.cfg['profiles'][args[0]])
+        return self.id_obj.community_url
+
+    def prof_url(self, args):
+        """ Prints profile's url and copies it to clipboard, cmd = uprof <prof_name> """
+        self.curl = self.get_prof_url(args)
+        print(self.curl, '\nCopied to clipboard!')
+        pyperclip.copy(self.curl)
+    
     def backup_profiles(self, args):
         """ Backs up userdata, stored in APPDATA/sutil_backup """
         try:
@@ -189,8 +199,6 @@ class SteamUtil(object):
             except KeyError as error:
                 print(f"Command {error} doesn't exist.\n")
                 self.help([])
-
-
 
 if __name__ == '__main__':
     a = SteamUtil()
