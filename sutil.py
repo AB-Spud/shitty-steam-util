@@ -1,6 +1,5 @@
 from steam import SteamID
 from encryptor import EncryptorFunctions
-from subprocess import Popen
 import requests, sys, os, json, shutil, shlex, pyperclip, time
 
 class SteamUtil(object):
@@ -11,7 +10,11 @@ class SteamUtil(object):
         self.is_dir()
         self.cfg = self.__get_cfg__()
         self.steam_path = os.path.join(self.cfg['steam_path'], '')
-        self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'login': self.steam_login ,'add': self.add_prof_details ,'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'uprof': self.prof_url, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
+        self.cmds = {
+        'help': self.help, 'exit': self.exit,'clear': self.clear, 'remove': self.prof_remove ,'pwrd': self.prof_pwrd, 'user': self.prof_uname ,
+        'details': self.prof_data, 'kill': self.kill_steam ,'login': self.steam_login ,'add': self.add_prof_details ,'init': self.stuffs ,'set': self.set_var,
+        'copy': self.copy, 'profs': self.list_profiles, 'uprof': self.prof_url, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles
+        }
 
     def __get_cfg__(self):
         if self.__check_file__(self.cfg_location):
@@ -49,8 +52,8 @@ class SteamUtil(object):
         try:
             self.cmds[cmd](args[0])
         except Exception as error:
-            if type(error) == KeyError:
-                print(f"Unkown command {error} type 'help' for a list of commands.")
+            if type(error) == KeyError:            
+                print(f"Unkown command or missing data {error} type 'help' for a list of commands.")
             else:
                 raise error
     
@@ -65,7 +68,11 @@ class SteamUtil(object):
                 self.url = SteamID(self.user).community_url
                 req = requests.get(self.url+'/ajaxaliases')
                 if req.status_code:
-                    self.cfg['profiles'][json.loads(req.content)[0]['newname']]['32'] = self.user
+                    if json.loads(req.content)[0]['newname'] in self.cfg['profiles'].keys():
+                        self.cfg['profiles'][json.loads(req.content)[0]['newname']]['32'] = self.user
+                    else:
+                        self.cfg['profiles'][json.loads(req.content)[0]['newname']] = {'32': self.user}
+
                     print(f"{self.i}  Added: '{json.loads(req.content)[0]['newname']}'")
                 else:
                     print(f'bad status request for {self.user}')
@@ -73,7 +80,8 @@ class SteamUtil(object):
             print(f'Added {self.i+1} users to the profile list')
             self.save_cfg()
 
-        except FileNotFoundError as error:
+        except Exception as error:
+            raise error
             print(f"var 'steam_path' is not a valid path\nsteam_path = '{self.cfg['steam_path']}'")
 
     def load_cfg(self, arg):
@@ -186,12 +194,17 @@ class SteamUtil(object):
             raise error
     
     def steam_login(self, args):
-        """ Uses stored profile to login to an account based off of username, cmd = login <username> """
+        """ Uses stored profile to login to an account based off of username, cmd = login <user_name> """
         try:
-            self.en_user = self.cfg['profiles'][args[0]]['account_name']
-            self.u_init = self.cfg['profiles'][args[0]]['u_init']
-            self.en_pwrd = self.cfg['profiles'][args[0]]['password']
-            self.p_init = self.cfg['profiles'][args[0]]['p_init']
+            if args[0] == self.cfg['login']:
+                self.un = self.cfg['master']
+            else:
+                self.un = args[0]
+
+            self.en_user = self.cfg['profiles'][self.un]['account_name']
+            self.u_init = self.cfg['profiles'][self.un]['u_init']
+            self.en_pwrd = self.cfg['profiles'][self.un]['password']
+            self.p_init = self.cfg['profiles'][self.un]['p_init']
 
             self.user_name = self.enc.decrypt(self.en_user, self.u_init)
             self.password = self.enc.decrypt(self.en_pwrd, self.p_init)
@@ -202,6 +215,39 @@ class SteamUtil(object):
 
         except Exception as error:
             raise error
+    
+    def kill_steam(self, args):
+        """ Kills the Steam.exe process - this can be used with the login function, cmd = kill """
+        try:
+            os.system(f"TASKKILL /F /IM Steam.exe /T")
+        except Exception as error:
+            print(error)
+    
+    def prof_data(self, args):
+        """ Returns JSON data associated with a username, cmd = details <user_name> """
+        print(self.cfg['profiles'][args[0]])
+        return self.cfg['profiles'][args[0]]
+    
+    def prof_uname(self, args):
+        """ Prints profile's account name & copies it to clipboard, cmd = user <user_name> """
+        self.en_user = self.cfg['profiles'][args[0]]['account_name']
+        self.u_init = self.cfg['profiles'][args[0]]['u_init']
+        self.user_name = self.enc.decrypt(self.en_user, self.u_init)
+        pyperclip.copy(self.user_name)
+        print(f"{args[0]} : {self.user_name}\nCopied to clipboard!")
+
+    def prof_pwrd(self, args):
+        """ Prints profile's password & copies it to clipboard, cmd = user <user_name> """
+        self.en_pwrd = self.cfg['profiles'][args[0]]['password']
+        self.p_init = self.cfg['profiles'][args[0]]['p_init']
+        self.password = self.enc.decrypt(self.en_pwrd, self.p_init)
+        pyperclip.copy(self.password)
+        print(f"{args[0]} : {self.password}\nCopied to clipboard!")
+    
+    def prof_remove(self, args):
+        """ Removes profile from account list, cmd = remove <user_name> """ 
+        del self.cfg['profiles'][args[0]]
+        self.save_cfg()
     
     def backup_profiles(self, args):
         """ Backs up userdata, stored in APPDATA/sutil_backup """
