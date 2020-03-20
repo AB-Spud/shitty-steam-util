@@ -29,8 +29,8 @@ How to setup:
   1010605382      0 : fucking weaboo
   1016722479      1 : Slumpp
   >>> add "fucking weaboo" <account_name> <password>
-  >>> kill // This will kill Steam.exe and its processes
-  >>> set login 1 // sets a master login var, this var points to the 'master' var
-  >>> login 1 // this will login to the account associated with the username "fucking weaboo"
+  >>> kill
+  >>> set login 1 --- this var points to 'master' var value
+  >>> login 1
   
 ```
