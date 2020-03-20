@@ -21,7 +21,17 @@ How to setup:
   1010605382      0 : fucking weaboo
   1016722479      1 : Slumpp
 
-  >>> set master Slumpp
+  >>> set master "fucking weaboo"
   >>> copy * master
   1 profiles inherited settings from Slumpp
+  
+  >>> profs
+  1010605382      0 : fucking weaboo
+  1016722479      1 : Slumpp
+  >>> add "fucking weaboo" <account_name> <password>
+  >>> kill // This will kill Steam.exe and its processes
+  >>> set login 1 // sets a master login var, this var points to the 'master' var
+  >>> login 1 // this will login to the account associated with the username "fucking weaboo"
+  
+  
 ```
