@@ -33,5 +33,4 @@ How to setup:
   >>> set login 1 // sets a master login var, this var points to the 'master' var
   >>> login 1 // this will login to the account associated with the username "fucking weaboo"
   
-  
 ```
