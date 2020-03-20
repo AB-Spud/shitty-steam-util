@@ -1,21 +1,24 @@
 from steam import SteamID
-import requests, sys, os, json, shutil, shlex, pyperclip
+from encryptor import EncryptorFunctions
+from subprocess import Popen
+import requests, sys, os, json, shutil, shlex, pyperclip, time
 
 class SteamUtil(object):
     def __init__(self):
+        self.enc = EncryptorFunctions()
         self.cfg_location = self.__parse_location__('sutil.json')
         self.backup_dir = self.__parse_location__('sutil_backup')
         self.is_dir()
         self.cfg = self.__get_cfg__()
         self.steam_path = os.path.join(self.cfg['steam_path'], '')
-        self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'uprof': self.prof_url, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
+        self.cmds = {'help': self.help, 'exit': self.exit,'clear': self.clear, 'login': self.steam_login ,'add': self.add_prof_details ,'init': self.stuffs ,'set': self.set_var, 'copy': self.copy, 'profs': self.list_profiles, 'uprof': self.prof_url, 'get': self.get_var, 'gprofs': self.update_profile_list, 'backup': self.backup_profiles}
 
     def __get_cfg__(self):
         if self.__check_file__(self.cfg_location):
             return self.load_cfg(self.cfg_location)
         else:
             return self.__create_cfg__()
-
+        
     def __parse_location__(self, arg):
         return os.path.join(os.environ['APPDATA'], arg)
     
@@ -29,7 +32,7 @@ class SteamUtil(object):
         self.cfg = {
             "steam_path": '',
             "master": '',
-            "profiles": {}
+            "profiles": {},
         }
 
         json.dump(self.cfg, open(self.cfg_location, 'w+'), indent=4)
@@ -62,7 +65,7 @@ class SteamUtil(object):
                 self.url = SteamID(self.user).community_url
                 req = requests.get(self.url+'/ajaxaliases')
                 if req.status_code:
-                    self.cfg['profiles'][json.loads(req.content)[0]['newname']] = self.user
+                    self.cfg['profiles'][json.loads(req.content)[0]['newname']]['32'] = self.user
                     print(f"{self.i}  Added: '{json.loads(req.content)[0]['newname']}'")
                 else:
                     print(f'bad status request for {self.user}')
@@ -92,7 +95,6 @@ class SteamUtil(object):
     
     def get_var(self, args):
         """ Takes a single arg, returns cfg variable, cmd = 'get <var>' """
-
         try:
             if args[0] == "*":
                 for self.v in self.cfg.keys():
@@ -117,11 +119,11 @@ class SteamUtil(object):
                 return None
 
         try:
-            self.parent_path = os.path.join(self.steam_path, ("userdata\\" + self.cfg['profiles'][self.p] + "\\730"))
+            self.parent_path = os.path.join(self.steam_path, ("userdata\\" + self.cfg['profiles'][self.p]['32'] + "\\730"))
             if args[0] == "*":
                 self.copy_all(self.p ,self.parent_path)
             else:
-                self.child_path = os.path.join(self.steam_path, ("userdata\\" + self.cfg['profiles'][args[0]] + "\\730" ))
+                self.child_path = os.path.join(self.steam_path, ("userdata\\" + self.cfg['profiles'][args[0]]['32'] + "\\730" ))
 
             try:
                 shutil.rmtree(self.child_path)
@@ -137,7 +139,7 @@ class SteamUtil(object):
             if self.prof == parent:
                 pass
             else:
-                self.child_path = os.path.join(self.steam_path, ("userdata\\" + self.cfg['profiles'][self.prof] + "\\730" ))
+                self.child_path = os.path.join(self.steam_path, ("userdata\\" + self.cfg['profiles'][self.prof]['32'] + "\\730" ))
                 try:
                     shutil.rmtree(self.child_path)
                     shutil.copytree(self.parent_path , self.child_path)
@@ -149,7 +151,7 @@ class SteamUtil(object):
     def list_profiles(self, args):
         """ Prints a list of all profiles that have been used on the PC, cmd = 'profs' """ 
         for self.index, self.profile in enumerate(self.get_profiles(args)):
-            self.id = self.cfg['profiles'][self.profile]
+            self.id = self.cfg['profiles'][self.profile]['32']
             print(f'{self.id} \t{self.index} :', self.profile)
         
     def get_profiles(self, args):
@@ -158,7 +160,7 @@ class SteamUtil(object):
     
     def get_prof_url(self, args):
         """ Return a profile's url """
-        self.id_obj = SteamID(self.cfg['profiles'][args[0]])
+        self.id_obj = SteamID(self.cfg['profiles'][args[0]]['32'])
         return self.id_obj.community_url
 
     def prof_url(self, args):
@@ -166,18 +168,52 @@ class SteamUtil(object):
         self.curl = self.get_prof_url(args)
         print(self.curl, '\nCopied to clipboard!')
         pyperclip.copy(self.curl)
+
+    def add_prof_details(self, args):
+        """ Add login details to a username, cmd = add <user_name> <account_name> <password> """
+        try:
+            self.en_user, self.u_init = self.enc.encrypt(args[1])
+            self.en_pwrd, self.p_init = self.enc.encrypt(args[2])
+
+            self.cfg['profiles'][args[0]]['account_name'] = self.en_user
+            self.cfg['profiles'][args[0]]['u_init'] = self.u_init
+            self.cfg['profiles'][args[0]]['password'] = self.en_pwrd
+            self.cfg['profiles'][args[0]]['p_init'] = self.p_init
+
+            self.save_cfg()
+
+        except Exception as error:
+            raise error
+    
+    def steam_login(self, args):
+        """ Uses stored profile to login to an account based off of username, cmd = login <username> """
+        try:
+            self.en_user = self.cfg['profiles'][args[0]]['account_name']
+            self.u_init = self.cfg['profiles'][args[0]]['u_init']
+            self.en_pwrd = self.cfg['profiles'][args[0]]['password']
+            self.p_init = self.cfg['profiles'][args[0]]['p_init']
+
+            self.user_name = self.enc.decrypt(self.en_user, self.u_init)
+            self.password = self.enc.decrypt(self.en_pwrd, self.p_init)
+
+            self.exe_path = os.path.join(self.steam_path, "Steam.exe")
+
+            os.system(f'start "" "{self.exe_path}" /parameters -login {self.user_name} {self.password}')
+
+        except Exception as error:
+            raise error
     
     def backup_profiles(self, args):
         """ Backs up userdata, stored in APPDATA/sutil_backup """
         try:
             for self.i, self.n in enumerate(self.get_profiles(args)):
-                self.path = os.path.join(self.cfg['steam_path'] + "\\userdata", self.cfg['profiles'][self.n])
+                self.path = os.path.join(self.cfg['steam_path'] + "\\userdata", self.cfg['profiles'][self.n]['32'])
                 try:
-                    shutil.rmtree(self.backup_dir+f"\\{self.cfg['profiles'][self.n]}")
+                    shutil.rmtree(self.backup_dir+f"\\{self.cfg['profiles'][self.n]['32']}")
                 except:
                     pass
-                shutil.copytree(src=self.path, dst=self.backup_dir+f"\\{self.cfg['profiles'][self.n]}")
-                print(f"{self.i}  Backing up: {self.path}")
+                shutil.copytree(src=self.path, dst=self.backup_dir+f"\\{self.cfg['profiles'][self.n]['32']}")
+                print(f"{self.i}  Backing up: {self.path}\t : {self.n}")
             print(f"Backed up {self.i+1} profiles.")
         except Exception as error:
             pass
@@ -207,3 +243,5 @@ if __name__ == '__main__':
         args = shlex.split(ar)
         if len(args) < 1: args = ['clear', '']
         a.call_cmd(args[0],args[1:])
+
+# start "" "C:\Program Files (x86)\Steam\Steam.exe" /parameters -login pepperoniruined PbTN2qZUKn
