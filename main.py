@@ -21,7 +21,7 @@ class CommandParse(UtilFunctions):
             if type(error) == KeyError:       
                 print(f"Malformed command at {error} type 'help' for a list of commands.")
             else:
-                # logging.exception(error)
+                logging.exception(error)
                 raise error
 
 if __name__ == "__main__":
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     except IndexError as error:
         print(f"No keyname was entered, using default name...")
         keyn = 'def'
-        
+
     cmdp = CommandParse(keyn)
     print("Type 'help' for help or 'init' if its your first time running this.\n")
     while True:
