@@ -30,7 +30,6 @@ How to setup:
   1016722479      1 : Slumpp
   >>> add "fucking weaboo" <account_name> <password>
   >>> kill
-  >>> set login 1 --- this var points to 'master' var value
-  >>> login 1
+  >>> login master
   
 ```
