@@ -129,8 +129,11 @@ class LocalUtil(object):
 
     def set_var(self, args):
         """ Takes list len of two, index 0 = var, index 1 = val, cmd :: 'set <var> <val>' """
-        self.cfg[args[0]] = args[1]
-        self.save_cfg()
+        try:
+            self.cfg[args[0]] = args[1]
+            self.save_cfg()
+        except Exception as error:
+            print(f"Error: {error}")
 
     def get_local_var(self, var):
         """ returns var or vars as a dict """
