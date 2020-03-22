@@ -109,13 +109,20 @@ class LocalUtil(object):
 
     def remove_var(self, args):
         """ Removes a var, cmd :: 'rmv <var>' """
-        del self.cfg[args[0]]
-        self.save_cfg()
+        try:
+            del self.cfg[args[0]]
+            self.save_cfg()
+        except Exception as error:
+            print(f"cmd :: rmv <var>\nError: {error}")
     
     def remove_32_pointer(self, args):
-        """ Removes a username that points to a steam_32 id from the cfg, cmd :: 'rm32 <user>' """
-        del self.cfg['users'][args[0]]
-        self.save_cfg()
+        try:
+            """ Removes a username that points to a steam_32 id from the cfg, cmd :: 'rm32 <user>' """
+            del self.cfg['users'][args[0]]
+            self.save_cfg()
+        except Exception as error:
+            print(f"cmd :: rm32 <var>\nError: {error}")
+
     
     def remove_details(self, args):
         """ Removes login details from a username, cmd :: 'rmd <user>' """
@@ -180,8 +187,8 @@ class LocalUtil(object):
             print('Saved!')
             self.save_cfg()
 
-        except Exception as error:
-            raise error
+        except IndexError as error:
+            print(f'cmd :: add <user_name> <account_name> <password>\nError: {error}')
 
     def copy(self, args):
         """ child inherits files from parent, cmd :: 'copy <child_user> <parent_user>' """
