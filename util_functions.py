@@ -9,7 +9,7 @@ class UtilFunctions(LocalUtil):
     def help(self, args):
         """ If 'help' is called returns list of commands, 'help <cmd>' returns details on the command """
         if len(args) < 1:
-            print("List of commands: ")
+            print("List of commands:\ncmd :: help <cmd>")
             for self.i, self.cmd in enumerate(self.cmds):
                 print(f"---",self.cmd)
             print(f"\nTotal commands: {self.i+1}")
@@ -36,19 +36,22 @@ class UtilFunctions(LocalUtil):
         sys.exit(0)
 
     def kill_steam(self, args):
-        """ Kills the Steam.exe process - this can be used with the login function, cmd = kill """
+        """ Kills the Steam.exe process - this can be used with the login function, cmd :: kill """
         try:
             os.system(f"TASKKILL /F /IM Steam.exe /T")
         except Exception as error:
             print(error)
 
     def display_var(self, args):
-        """ Takes a single arg, returns cfg variable, cmd = 'get <var>' """
+        """ Takes a single arg, returns cfg variable, cmd :: 'get <var>' """
         try:
             for self.d, self.v in enumerate(self.get_local_var(args[0])):
                 print(f"{self.d} var : {self.v} = {self.cfg[self.v]}")
         except Exception as error:
-            print(f"cmd :: get <var>\nvariable '{args[0]}' doesn't exit - otherwise {error}")
+            if type(error) == KeyError:
+                print(f"cmd :: get <var>\nvariable '{args[0]}' doesn't exit")
+            else:
+                print(f"cmd :: get <var>\nError: {error}")
 
 
     def display_profiles(self, args):
@@ -89,40 +92,49 @@ class UtilFunctions(LocalUtil):
 
     def get_prof_uname(self, args):
         try:
-            """ Prints profile's account name & copies it to clipboard, cmd = user <user_name> """
+            """ Prints profile's account name & copies it to clipboard, cmd :: user <user_name> """
             self.u_32 = self.cfg['users'][args[0]]
             self.en_user = self.cfg['profiles'][self.u_32]['details']['account_name']
             self.u_init = self.cfg['profiles'][self.u_32]['details']['u_init']
             self.user_name = self.decrypt(self.en_user, self.u_init)
             pyperclip.copy(self.user_name)
             print(f"{args[0]} : {self.user_name}\nCopied to clipboard!")
-        except KeyError as error:
-            print(f"{args[0]} does not have detail: {error}")
+        except Exception as error:
+            if type(error) == KeyError:
+                print(f"{args[0]} does not have detail: {error} - otherwise {error} is not a user")
+            else:
+                print(f'cmd :: user <user_name>\nError: {error}')
 
     def get_prof_pwrd(self, args):
         try:
-            """ Prints profile's password & copies it to clipboard, cmd = user <user_name> """
+            """ Prints profile's password & copies it to clipboard, cmd :: user <user_name> """
             self.u_32 = self.cfg['users'][args[0]]
             self.en_pwrd = self.cfg['profiles'][self.u_32]['details']['password']
             self.p_init = self.cfg['profiles'][self.u_32]['details']['p_init']
             self.password = self.decrypt(self.en_pwrd, self.p_init)
             pyperclip.copy(self.password)
             print(f"{args[0]} : {self.password}\nCopied to clipboard!")
-        except KeyError as error:
-            print(f"{args[0]} does not have detail: {error}")
+        except Exception as error:
+            if type(error) == KeyError:
+                print(f"{args[0]} does not have detail: {error} - otherwise {error} is not a user")
+            else:
+                print(f'cmd :: user <user_name>\nError: {error}')
 
     def prof_url(self, args):
-        """ Return a profile's url """
+        """ Return a profile's url, cmd :: uprof <user_name> """
         try:
-            self.u_32 = self.cfg['users'][self.get_local_var(args[0])[args[0]]]
-        except:
-            self.u_32 = self.cfg['users'][args[0]]
-        self.curl = SteamID(self.u_32).community_url
-        print(self.curl, '\nCopied to clipboard!')
-        pyperclip.copy(self.curl)
+            try:
+                self.u_32 = self.cfg['users'][self.get_local_var(args[0])[args[0]]]
+            except:
+                self.u_32 = self.cfg['users'][args[0]]
+            self.curl = SteamID(self.u_32).community_url
+            print(self.curl, '\nCopied to clipboard!')
+            pyperclip.copy(self.curl)
+        except Exception as error:
+            print(f"cmd :: uprof <user_name>\nError: {error}")
 
     def steam_login(self, args):
-        """ Uses stored profile to login to an account based off of username, cmd = login <user_name> """
+        """ Uses stored profile details to login to an account based off of username, cmd :: login <user_name> """
         try:
             try:
                 self.un = self.cfg['users'][self.get_local_var(args[0])[args[0]]]
