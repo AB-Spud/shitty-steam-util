@@ -1,5 +1,4 @@
 from steam import SteamID
-from encryptor import EncryptorFunctions
 from local_util import LocalUtil
 import requests, sys, os, json, shlex, pyperclip
 
