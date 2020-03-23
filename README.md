@@ -29,7 +29,7 @@ How to setup:
   1010605382      0 : fucking weaboo
   1016722479      1 : Slumpp
   >>> add "fucking weaboo" <account_name> <password>
-  >>> kill
+  >>> logout
   >>> login master
   
 ```
