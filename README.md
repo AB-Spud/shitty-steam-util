@@ -23,7 +23,7 @@ How to setup:
 
   >>> set master "fucking weaboo"
   >>> copy * master
-  1 profiles inherited settings from fucking weaboo
+  1 profiles inherited settings from master
   
   >>> profs
   1010605382      0 : fucking weaboo
