@@ -30,8 +30,8 @@ How to setup:
   1016722479      1 : Slumpp
   >>> add "fucking weaboo" <account_name> <password>
   >>> logout
-  >>> login master
+  >>> login master - logs in to master account
   or
-  >>> login master 730
+  >>> login master 730 - logs in to master account and launches csgo(730 = csgo's app id)
   
 ```
