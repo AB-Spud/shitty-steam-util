@@ -1,7 +1,7 @@
-# shitty-steam-util
+# steam-account-manager
 
-## Command line tool used to easily copy CSGO settings between profiles.
-## Can also be used as a profile manager use 'help login' for more details.
+## Command line profile manager use 'help login' for more details.
+## Can also be used to easily copy CSGO settings between profiles, use 'help copy' for more details.
 #### use the 'help' command for list of commands & 'help help' to see how to use the command
 #### <a href="https://www.mediafire.com/file/a16mnono6936cj5/sutil.exe/file">Compiled SUTIL</a>
 
@@ -31,5 +31,7 @@ How to setup:
   >>> add "fucking weaboo" <account_name> <password>
   >>> logout
   >>> login master
+  or
+  >>> login master 730
   
 ```
